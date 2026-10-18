@@ -95,3 +95,22 @@ a bound from a particular classifier, not an estimate of true capacity.
 - The J-lens readout of C's workspace (the original idea) needs the lens from
   RealTimeReadWrite and is left as the next step; the linear probe is the
   lens-free version.
+
+## Addendum 1 — written 2026-10-18, before any model run and before any result
+
+Implementation choices fixed while writing the code. None changes a threshold.
+
+- R-hidden uses a standardised ridge classifier (alpha = 10) instead of logistic
+  regression. Reason: the 1000-shuffle null has to repeat the whole procedure,
+  including the inner layer selection, and ridge makes that take minutes, not hours.
+  R-text keeps logistic regression.
+- Folds: outer fold = topic index mod 4. Inner layer selection: 3 folds over the
+  training topics only.
+- Shuffles permute labels within each topic.
+- V5 labels: the 60 no-B episodes get a balanced random label assignment (seed 0)
+  before the filter is applied.
+- Balancing: per-class subsampling to the minimum count uses seed 0. A set with
+  fewer than 8 clean notes per colour is reported NOT EVALUABLE, not FAIL.
+- If V4 fails, V1-V3 are reported VOID. V5 is still reported.
+- Extra reported lines: how often A's note is identical across all four Z for the
+  same (script, topic) (A ignored B), how often A mentions B, empty notes.
