@@ -7,11 +7,12 @@ This is the lab version of "information leaking from people we never talk to,
 through a third party". Humans can't rerun the same conversation with one hidden
 variable changed. A model can.
 
-**Status: run 1 done (Qwen2.5-0.5B-Instruct).** V4 failed, so V1–V3 are VOID: the
-0.5B middleman almost never carries B's colour into its note, even when B states it
-(13/240). Z changes A's note in 80–95% of counterfactual pairs, but the change carries
-no detectable Z. See [RESULTS.md](RESULTS.md). Gates were pre-registered
-([PREREG.md](PREREG.md)) before any code; both addenda came before any model run.
+**Status: two runs done (Qwen2.5-0.5B and 3B-Instruct).** V4 failed both times, so
+V1–V3 are VOID: told "do not mention B", the middleman carries no explicit colour (0.5B:
+13/240 notes, 3B: 0/240). B's colour changes A's note in 58–95% of counterfactual groups,
+but the change carries no detectable colour. A weak, uncorrected leave-script-out hint at
+3B (p = 0.012, post-hoc) needs a confirmatory run on new B scripts. See
+[RESULTS.md](RESULTS.md). Gates were pre-registered ([PREREG.md](PREREG.md)) before any code.
 
 ## The chain
 

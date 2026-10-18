@@ -123,6 +123,10 @@ def top1(probs, y):
 
 
 def fano_bits(acc, k=4):
+    # Below-chance CV accuracy is an artefact of small balanced folds, not information.
+    # Fano would credit it (a reliably wrong guesser is informative), so clip at chance.
+    if acc <= 1.0 / k:
+        return 0.0
     pe = 1.0 - acc
     if pe <= 0:
         return math.log2(k)
