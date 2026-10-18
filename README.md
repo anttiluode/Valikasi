@@ -7,11 +7,11 @@ This is the lab version of "information leaking from people we never talk to,
 through a third party". Humans can't rerun the same conversation with one hidden
 variable changed. A model can.
 
-**Status: built, instrument-tested, not yet run on a real model.** Hugging Face is
-unreachable from the machine that built this, so nothing here has touched Qwen
-weights. Every gate currently reads *not run*. Gates were pre-registered
-([PREREG.md](PREREG.md)) before any code existed; two addenda were written before any
-model run and are in the same file.
+**Status: run 1 done (Qwen2.5-0.5B-Instruct).** V4 failed, so V1–V3 are VOID: the
+0.5B middleman almost never carries B's colour into its note, even when B states it
+(13/240). Z changes A's note in 80–95% of counterfactual pairs, but the change carries
+no detectable Z. See [RESULTS.md](RESULTS.md). Gates were pre-registered
+([PREREG.md](PREREG.md)) before any code; both addenda came before any model run.
 
 ## The chain
 
@@ -93,7 +93,7 @@ resumes.** I haven't timed generation on a 3060; the shuffle tests (1000 each) t
 roughly 4 min for text and 6 min for hidden states on a 2-core CPU. Output:
 `results/results.json` and `results/LEDGER.md`.
 
-Options: `--model-c <other model>` for V6, `--perms`, `--max-new`. Using fewer topics or
+Options: `--model <A and C>`, `--model-c <other model>` for V6, `--dtype bfloat16` for 3B+ on a 12 GB GPU, `--perms`, `--max-new`. Using fewer topics or
 scripts (`--topics 8 --scripts 3`) is a dry run, not the registered design. Paste
 `results/LEDGER.md` back and I'll write the results in as registered.
 

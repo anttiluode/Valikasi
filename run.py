@@ -76,6 +76,8 @@ def main():
     ap.add_argument("--scripts", type=int, default=5)
     ap.add_argument("--fake", action="store_true")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--dtype", default="float32", choices=["float32", "bfloat16", "float16"],
+                    help="float32 is the registered run; use bfloat16 for 3B+ on a 12 GB GPU")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     rng = np.random.default_rng(a.seed)
@@ -88,8 +90,10 @@ def main():
         MA = tiny_model(0)
         MC = tiny_model(1) if a.model_c else MA
     else:
-        MA = pl.load_model(a.model)
-        MC = pl.load_model(a.model_c) if a.model_c else MA
+        import torch
+        dt = getattr(torch, a.dtype)
+        MA = pl.load_model(a.model, dtype=dt)
+        MC = pl.load_model(a.model_c, dtype=dt) if a.model_c else MA
 
     notes = pl.generate_all(MA, eps, os.path.join(a.out, "notes.jsonl"), a.max_new, log)
 
