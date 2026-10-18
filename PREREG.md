@@ -114,3 +114,16 @@ Implementation choices fixed while writing the code. None changes a threshold.
 - If V4 fails, V1-V3 are reported VOID. V5 is still reported.
 - Extra reported lines: how often A's note is identical across all four Z for the
   same (script, topic) (A ignored B), how often A mentions B, empty notes.
+
+## Addendum 2 — written 2026-10-18, before any real model run
+
+Topic-grouped CV keeps topic from carrying the signal, but the same five B
+scripts appear in training and test folds. A classifier could therefore learn
+"this particular B conversation", not "Z". Because inside one script the four Z
+variants differ only in Z, that still counts as leakage of Z, and the gates stay
+as registered. Added as **reported only, no threshold**: leave-script-out
+accuracy (outer folds = script index) for R-text and R-hidden on L1-clean,
+L2-all and L2-clean. This shows whether the leak generalises to B conversations
+the classifier has never seen. If a gate passes by topic-CV but the leave-script-out
+accuracy is at chance, the honest reading is "leaks within a conversation's
+style, does not generalise across conversations".

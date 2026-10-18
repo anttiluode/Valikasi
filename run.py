@@ -28,7 +28,8 @@ def tag(name):
     return re.sub(r"[^A-Za-z0-9]+", "_", name)
 
 
-def analyse_set(name, idx, y, texts, topics, hid, probs, rng, n_perm, perms=True):
+def analyse_set(name, idx, y, texts, topics, hid, probs, rng, n_perm, perms=True,
+                scripts=None, n_scripts=0):
     r = dict(name=name, n=int(len(idx)))
     t, tp = [texts[i] for i in idx], topics[idx]
     r["text_acc"] = ms.cv_text(t, y, tp)
@@ -43,6 +44,11 @@ def analyse_set(name, idx, y, texts, topics, hid, probs, rng, n_perm, perms=True
         r["hid_bits_lb"] = ms.fano_bits(acc)
         if perms:
             r["hid_p"] = ms.perm_p(lambda yp: ms.cv_hidden(X, yp, tp), acc, y, tp, n_perm, rng)
+    if scripts is not None and n_scripts >= 3:  # reported only: unseen B conversations
+        sp = scripts[idx]
+        r["text_acc_scriptout"] = ms.cv_text(t, y, sp, nfold=n_scripts)
+        if hid is not None:
+            r["hid_acc_scriptout"] = ms.cv_hidden(hid[idx], y, sp, nfold=n_scripts)
     if probs is not None:
         P = probs[idx]
         r["delta"] = ms.delta(P, y)
@@ -102,6 +108,7 @@ def main():
     level = np.array([e["level"] for e in eps])
     lab = np.array([e["label"] for e in eps])
     topics = np.array([e["topic_idx"] for e in eps])
+    scripts = np.array([e["script"] for e in eps])
     colour = np.array([e["colour"] or "" for e in eps])
     texts = [notes[e["id"]] for e in eps]
     clean = np.array([is_clean(t) for t in texts])
@@ -148,7 +155,7 @@ def main():
         if per_class < MIN_PER_COLOUR:
             return None
         return analyse_set(key, idx, labels[idx], texts, topics, h if hh else None, p, rng,
-                           a.perms, perms)
+                           a.perms, perms, scripts, a.scripts)
 
     log("analysing")
     R["L1_all"] = run("L1_all", lab, False, hh=False)
@@ -183,6 +190,8 @@ def main():
     lines += ["", "| set | n | text acc | hidden acc | delta [95% CI] | top-1 | text bits (Fano) |",
               "|---|---|---|---|---|---|---|"]
     for k in ("L1_all", "L1_clean", "L2_all", "L2_clean", "NOB_clean", "L2_clean_C_other"):
+        if k not in R:
+            continue
         r = R.get(k)
         if r is None:
             lines.append(f"| {k} | too few clean notes | | | | | |")
@@ -190,6 +199,11 @@ def main():
         d = "-" if "delta" not in r else f"{r['delta']:+.3f} [{r['delta_ci'][0]:+.3f}, {r['delta_ci'][1]:+.3f}]"
         lines.append(f"| {k} | {r['n']} | {f(r.get('text_acc'))} | {f(r.get('hid_acc'))} | {d} | "
                      f"{f(r.get('top1'))} | {f(r.get('text_bits_lb'))} |")
+    so = [f"{k}: text {R[k]['text_acc_scriptout']:.3f}"
+          + (f", hidden {R[k]['hid_acc_scriptout']:.3f}" if "hid_acc_scriptout" in R[k] else "")
+          for k in ("L1_clean", "L2_all", "L2_clean") if R.get(k) and "text_acc_scriptout" in R[k]]
+    if so:
+        lines += ["", "leave-script-out accuracy (reported only, unseen B conversations): " + "; ".join(so)]
     lines += ["", f"survival (note has no lexicon word): {json.dumps(surv)}",
               f"A ignored B entirely in L2 (identical note across all four Z): {R['L2_ignore_rate']:.2f}",
               f"empty notes: {R['empty_notes']}, notes mentioning B: {R['mentions_B']:.2f}"]

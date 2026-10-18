@@ -38,11 +38,12 @@ def _text_predict(txt_tr, ytr, txt_te):
         return _majority(ytr, len(txt_te))
 
 
-def cv_text(texts, y, topics):
+def cv_text(texts, y, topics, nfold=NFOLD):
+    """`topics` is the grouping vector (topic index, or script index for leave-script-out)."""
     texts = np.asarray(texts, dtype=object)
-    folds = topics % NFOLD
+    folds = topics % nfold
     pred = np.empty_like(y)
-    for f in range(NFOLD):
+    for f in range(nfold):
         te = folds == f
         if not te.any() or te.all():
             continue
@@ -56,13 +57,13 @@ def _ridge_predict(Xtr, ytr, Xte):
     return clf.predict(sc.transform(Xte))
 
 
-def cv_hidden(X, y, topics, return_layers=False):
-    """X: (n, n_layers, d). Layer picked by inner CV on training topics only."""
+def cv_hidden(X, y, topics, return_layers=False, nfold=NFOLD):
+    """X: (n, n_layers, d). Layer picked by inner CV on training groups only."""
     n, L, _ = X.shape
-    folds = topics % NFOLD
+    folds = topics % nfold
     pred = np.empty_like(y)
     chosen = []
-    for f in range(NFOLD):
+    for f in range(nfold):
         te = folds == f
         tr = ~te
         if not te.any() or te.all():
